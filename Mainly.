@@ -1,0 +1,214 @@
+local BLOCK_KEY = "LoginBlock"
+local MAX_FAIL = 10
+local BLOCK_TIME = 50*60
+local USERNAME = "CreenSHkhs"
+local PASSWORD = "HfVtAvD"
+
+local failCount = 0
+local blockedUntil = 0
+
+local function tween(obj, info, goals)
+	local t = TweenService:Create(obj, info, goals)
+	t:Play()
+	return t
+end
+
+local function addUICorner(obj, radius)
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = radius or UDim.new(0,10)
+	corner.Parent = obj
+end
+
+local function notify(msg)
+	local n = Instance.new("TextLabel")
+	n.Text = msg
+	n.Font = Enum.Font.FredokaOne
+	n.TextSize = 24
+	n.TextColor3 = Color3.new(1,1,0)
+	n.BackgroundTransparency = 0.5
+	n.BackgroundColor3 = Color3.new(0,0,0)
+	n.Size = UDim2.new(0,400,0,50)
+	n.Position = UDim2.new(0.5,0,0.1,0)
+	n.AnchorPoint = Vector2.new(0.5,0)
+	addUICorner(n, UDim.new(0,10))
+	n.Parent = Player.PlayerGui
+	tween(n,TweenInfo.new(0.5,Enum.EasingStyle.Sine,Enum.EasingDirection.Out),{Position=UDim2.new(0.5,0,0.05,0)})
+	delay(2,function() n:Destroy() end)
+end
+
+-- ===== ロード画面 =====
+local loadGui = Instance.new("ScreenGui", Player.PlayerGui)
+loadGui.ResetOnSpawn = false
+local loadFrame = Instance.new("Frame")
+loadFrame.Size = UDim2.new(1,0,1,0)
+loadFrame.Position = UDim2.new(0,0,0,0)
+loadFrame.BackgroundColor3 = Color3.new(0,0,0)
+loadFrame.BackgroundTransparency = 0.5
+loadFrame.Parent = loadGui
+
+local loadingLabel = Instance.new("TextLabel")
+loadingLabel.Text = "ロード中"
+loadingLabel.Font = Enum.Font.FredokaOne
+loadingLabel.TextSize = 40
+loadingLabel.TextColor3 = Color3.new(1,1,1)
+loadingLabel.BackgroundTransparency = 1
+loadingLabel.AnchorPoint = Vector2.new(0.5,0.5)
+loadingLabel.Position = UDim2.new(0.5,0,0.75,0)
+loadingLabel.Parent = loadFrame
+
+local infoLabel = Instance.new("TextLabel")
+infoLabel.Text = "少々お待ちください"
+infoLabel.Font = Enum.Font.FredokaOne
+infoLabel.TextSize = 30
+infoLabel.TextColor3 = Color3.new(1,1,1)
+infoLabel.BackgroundTransparency = 1
+infoLabel.AnchorPoint = Vector2.new(0.5,0.5)
+infoLabel.Position = UDim2.new(0.5,0,0.82,0)
+infoLabel.Parent = loadFrame
+
+local imageLabel = Instance.new("ImageLabel")
+imageLabel.Size = UDim2.new(0,100,0,100)
+imageLabel.Position = UDim2.new(0.5,0,0.5,0)
+imageLabel.AnchorPoint = Vector2.new(0.5,0.5)
+imageLabel.BackgroundTransparency = 1
+imageLabel.Image = "rbxassetid://103729005675073"
+imageLabel.ImageTransparency = 1
+imageLabel.Parent = loadFrame
+
+tween(imageLabel, TweenInfo.new(1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out), {Size=UDim2.new(0,100,0,100),ImageTransparency=0})
+tween(imageLabel, TweenInfo.new(0.5,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut,-1,true), {Rotation=15})
+tween(imageLabel, TweenInfo.new(0.7,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut,-1,true), {Size=UDim2.new(0,110,0,110)})
+tween(imageLabel, TweenInfo.new(1,Enum.EasingStyle.Back,Enum.EasingDirection.InOut,-1,true), {Position=UDim2.new(0.5,math.random(-15,15),0.5,math.random(-15,15))})
+
+RunService.RenderStepped:Connect(function()
+	local t = tick()
+	imageLabel.Rotation = 15*math.sin(t*3)
+	imageLabel.Position = UDim2.new(0.5, math.sin(t*4)*8, 0.5, math.cos(t*3.5)*8)
+	imageLabel.Size = UDim2.new(0, 100 + 5*math.sin(t*2), 0, 100 + 5*math.sin(t*2))
+	imageLabel.ImageTransparency = 0.2 + 0.3*math.sin(t*2)
+end)
+
+-- ===== ログインGUI =====
+local function createLoginGUI()
+	local loginGui = Instance.new("ScreenGui", Player.PlayerGui)
+	loginGui.ResetOnSpawn = false
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(0,450,0,350)
+	frame.Position = UDim2.new(0.5,0,0.5,0)
+	frame.AnchorPoint = Vector2.new(0.5,0.5)
+	frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+	frame.BorderSizePixel = 0
+	addUICorner(frame, UDim.new(0,15))
+	frame.Parent = loginGui
+
+	local title = Instance.new("TextLabel")
+	title.Text = "ユーザーログイン"
+	title.Font = Enum.Font.FredokaOne
+	title.TextSize = 42
+	title.TextColor3 = Color3.fromRGB(255,255,255)
+	title.BackgroundTransparency = 1
+	title.AnchorPoint = Vector2.new(0.5,0)
+	title.Position = UDim2.new(0.5,0,0,25)
+	title.Parent = frame
+
+	local usernameBox = Instance.new("TextBox")
+	usernameBox.PlaceholderText = "ユーザー名"
+	usernameBox.Font = Enum.Font.FredokaOne
+	usernameBox.TextSize = 26
+	usernameBox.TextColor3 = Color3.fromRGB(0,0,0)
+	usernameBox.BackgroundColor3 = Color3.fromRGB(240,240,240)
+	usernameBox.Size = UDim2.new(0,360,0,50)
+	usernameBox.Position = UDim2.new(0.5,0,0,100)
+	usernameBox.AnchorPoint = Vector2.new(0.5,0)
+	usernameBox.ClearTextOnFocus = false
+	addUICorner(usernameBox, UDim.new(0,10))
+	usernameBox.Parent = frame
+	usernameBox.TextXAlignment = Enum.TextXAlignment.Left
+
+	local passwordBox = Instance.new("TextBox")
+	passwordBox.PlaceholderText = "パスワード"
+	passwordBox.Font = Enum.Font.FredokaOne
+	passwordBox.TextSize = 26
+	passwordBox.TextColor3 = Color3.fromRGB(0,0,0)
+	passwordBox.BackgroundColor3 = Color3.fromRGB(240,240,240)
+	passwordBox.Size = UDim2.new(0,360,0,50)
+	passwordBox.Position = UDim2.new(0.5,0,0,170)
+	passwordBox.AnchorPoint = Vector2.new(0.5,0)
+	passwordBox.ClearTextOnFocus = false
+	passwordBox.TextEditable = true
+	passwordBox.Text = ""
+	passwordBox.TextXAlignment = Enum.TextXAlignment.Left
+	passwordBox.TextYAlignment = Enum.TextYAlignment.Center
+	addUICorner(passwordBox, UDim.new(0,10))
+	passwordBox.Parent = frame
+
+	local loginButton = Instance.new("TextButton")
+	loginButton.Text = "ログイン"
+	loginButton.Font = Enum.Font.FredokaOne
+	loginButton.TextSize = 28
+	loginButton.TextColor3 = Color3.fromRGB(255,255,255)
+	loginButton.BackgroundColor3 = Color3.fromRGB(0,120,255)
+	loginButton.Size = UDim2.new(0,200,0,50)
+	loginButton.Position = UDim2.new(0.5,0,0,250)
+	loginButton.AnchorPoint = Vector2.new(0.5,0)
+	addUICorner(loginButton, UDim.new(0,12))
+	loginButton.Parent = frame
+
+	-- ===== ドラッグ可能 =====
+	local dragging = false
+	local dragInput, mousePos, framePos
+	frame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			mousePos = input.Position
+			framePos = frame.Position
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+	frame.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			dragInput = input
+		end
+	end)
+	UserInputService.InputChanged:Connect(function(input)
+		if input == dragInput and dragging then
+			local delta = input.Position - mousePos
+			frame.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X,
+				framePos.Y.Scale, framePos.Y.Offset + delta.Y)
+		end
+	end)
+
+	-- ===== ログイン処理 =====
+	loginButton.MouseButton1Click:Connect(function()
+		local username = usernameBox.Text
+		local password = passwordBox.Text
+
+		if tick() < blockedUntil then
+			notify("ログイン禁止中です")
+			return
+		end
+
+		if username == USERNAME and password == PASSWORD then
+			loginGui:Destroy()
+			notify("ログイン成功")
+		else
+			failCount = failCount + 1
+			notify("パスワードが違います ("..failCount.."/"..MAX_FAIL..")")
+			if failCount >= MAX_FAIL then
+				blockedUntil = tick() + BLOCK_TIME
+				notify("10回間違えました。50分間ログイン不可")
+				delay(1,function() Player:Kick("50分間ログイン不可") end)
+			end
+		end
+	end)
+end
+
+-- ロード画面を5秒表示後にログインGUI
+delay(5,function()
+	loadGui:Destroy()
+	createLoginGUI()
+end)
